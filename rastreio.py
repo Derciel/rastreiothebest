@@ -31,7 +31,13 @@ def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS'):
     """
     try:
         # Carrega credenciais do Streamlit Secrets
-        creds = Credentials.from_service_account_info(st.secrets["service_account"])
+        creds = Credentials.from_service_account_info(
+            st.secrets["service_account"],
+            scopes=[
+                "https://www.googleapis.com/auth/spreadsheets.readonly",
+                "https://www.googleapis.com/auth/drive.readonly"
+            ]
+        )
         client = gspread.authorize(creds)
 
         sheet = client.open_by_key(sheet_id).worksheet(sheet_name)
