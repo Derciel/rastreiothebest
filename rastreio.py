@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 from google.oauth2.service_account import Credentials
 import gspread
-import toml
 import logging
 
 # Configuração do logger
@@ -15,19 +14,6 @@ logging.basicConfig(
     ]
 )
 
-# Função para carregar credenciais a partir de um arquivo TOML
-def load_credentials_from_toml(toml_file):
-    """
-    Carrega credenciais do arquivo TOML.
-    """
-    try:
-        with open(toml_file, "r") as file:
-            config = toml.load(file)
-            return config["service_account"]
-    except Exception as e:
-        logging.error(f"Erro ao carregar credenciais: {e}")
-        return None
-
 # Função para formatar o CNPJ
 def formatar_cnpj(cnpj):
     """
@@ -39,19 +25,17 @@ def formatar_cnpj(cnpj):
     return cnpj
 
 # Função para carregar dados do Google Sheets
-def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS', credentials=None):
+def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS'):
     """
     Carrega os dados de uma planilha do Google Sheets.
     """
-    if not credentials:
-        return None, "Credenciais não fornecidas."
-
     try:
-        creds = Credentials.from_service_account_info(credentials)
+        # Carrega credenciais do Streamlit Secrets
+        creds = Credentials.from_service_account_info(st.secrets["service_account"])
         client = gspread.authorize(creds)
+
         sheet = client.open_by_key(sheet_id).worksheet(sheet_name)
         data = sheet.get_all_records()
-
         if not data:
             logging.warning("A planilha não contém dados.")
             return None, "A planilha não contém dados."
@@ -99,6 +83,13 @@ st.markdown(
         padding: 20px;
         border-radius: 15px;
     }
+    .stMarkdown {
+        color: white !important; /* Garante que todos os textos sejam exibidos em branco */
+    }
+    .stDataFrame {
+        color: white !important;
+        background-color: rgba(34, 34, 34, 0.9) !important; /* Fundo escuro para contraste */
+    }
     header { 
         background-color: rgba(0, 0, 0, 0.3) !important; /* Torna a barra de cabeçalho transparente */
     }
@@ -119,21 +110,26 @@ st.markdown(
 
 st.markdown("<h1 style='color:white;'>📄 Consulta de Notas e Rastreamento - THE BEST AÇAI - DONUTS</h1>", unsafe_allow_html=True)
 st.markdown("<p style='color:white;'>Bem-vindo ao sistema de consulta de notas e rastreamento da The Best Açai - Donuts.</p>", unsafe_allow_html=True)
+st.markdown("<h3 style='color:white;'>Modo de Consulta:</h3>", unsafe_allow_html=True)
+st.markdown("<p style='color:white;'>1. Localize a nota fiscal pelo CNPJ.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:white;'>2. Copie a Nota Fiscal.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:white;'>3. Clique no logo da transportadora ao lado do Pesquisar Notas Fiscais.</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:white;'>4. Já com sua NF copie o CNPJ do Remetente - 10.815.855/0001-24 : Nicopel Embalagens LTDA e rastreie</p>", unsafe_allow_html=True)
 
-# Carregar credenciais do arquivo TOML
-credentials = load_credentials_from_toml("credentials.toml")
-if not credentials:
-    st.error("Erro ao carregar credenciais. Verifique o arquivo TOML.")
+sheet_id = "1gXMG571pgj2YSKo2LKAqLLZWxd_jyo_xhs4s-bg6bSo"
+
+df, error = load_google_sheet(sheet_id, "donuts")
+
+if error:
+    st.error(error)
 else:
-    # Carregar planilha do Google Sheets
-    sheet_id = "1gXMG571pgj2YSKo2LKAqLLZWxd_jyo_xhs4s-bg6bSo"
-    df, error = load_google_sheet(sheet_id, "donuts", credentials)
+    col1, col2 = st.columns([3, 1])
 
-    if error:
-        st.error(error)
-    else:
+    with col1:
+        # Campo de busca
         st.markdown("<h3 style='color:white;'>Pesquisar Notas Fiscais</h3>", unsafe_allow_html=True)
-        query = st.text_input("Digite o CNPJ (formato: 00.000.000/0000-00):")
+        st.markdown("<p style='color:white;'>Digite o CNPJ para buscar (ex: 00.000.000/0000-00):</p>", unsafe_allow_html=True)
+        query = st.text_input("", value="", key="query_field")  # Campo de texto sem título embutido
 
         if st.button("Buscar Nota Fiscal"):
             if query:
@@ -146,15 +142,28 @@ else:
                     st.success(f"{len(filtered_df)} resultado(s) encontrado(s).")
                     st.dataframe(filtered_df)
 
-        # Adicionar botão para rastrear NF
+    with col2:
         st.markdown("<h3 style='color:white; text-align:center;'>Rastrear NF</h3>", unsafe_allow_html=True)
         st.markdown("<p style='color:white; text-align:center;'>Clique abaixo para Rastrear Pedido:</p>", unsafe_allow_html=True)
+        if "Transportadora" in df.columns:
+            for index, row in df.iterrows():
+                transportadora = row.get("Transportadora", "")
+                rastreio_url = f"https://rodonaves.com.br/rastreio-de-mercadoria"
+                st.markdown(
+                    f"<div style='display: flex; align-items: center; justify-content: center; margin-bottom: 10px;'>"
+                    f"<img src='https://i.ibb.co/nnvt26n/logo-header-1.png' alt='Logo Transportadora' style='width:50px; height:auto; margin-right: 10px;'>"
+                    f"<a href='{rastreio_url}' target='_blank' style='color: white; text-decoration: none; font-weight: bold;'>Rastrear {transportadora}</a>"
+                    f"</div>",
+                    unsafe_allow_html=True
+                )
+
+        # Botão clicável adicional com a logo da transportadora
         st.markdown(
             """
             <div style='text-align: center; margin-top: 20px;'>
                 <a href='https://rodonaves.com.br/rastreio-de-mercadoria' target='_blank'>
-                    <button style='background-color: blue; color: white; padding: 10px 20px; border: none; border-radius: 5px;'>
-                        <img src='https://i.ibb.co/nnvt26n/logo-header-1.png' alt='Rastrear' style='width: 30px; vertical-align: middle;'> Rastrear Transportadora
+                    <button style='background-color: blue; color: black; padding: 10px 20px; border: none; border-radius: 5px;'>
+                        <img src='https://i.ibb.co/nnvt26n/logo-header-1.png' alt='Rastrear' style='width: 150px; vertical-align: middle;'> Rastrear Transportadora
                     </button>
                 </a>
             </div>
