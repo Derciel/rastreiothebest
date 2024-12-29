@@ -34,6 +34,9 @@ def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS'):
     try:
         # Carregar credenciais do st.secrets
         creds_info = st.secrets["GCLOUD_CREDENTIALS"]
+        if isinstance(creds_info, str):
+            creds_info = eval(creds_info)  # Certifique-se de que está lidando com um dicionário
+
         creds = Credentials.from_service_account_info(creds_info, scopes=scope)
         client = gspread.authorize(creds)
 
@@ -53,6 +56,7 @@ def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS'):
     except Exception as e:
         logging.error(f"Erro ao abrir a planilha: {e}")
         return None, f"Erro ao abrir a planilha: {e}"
+
 
 # Função para filtrar dados da planilha
 def filtrar_dados(df, query):
