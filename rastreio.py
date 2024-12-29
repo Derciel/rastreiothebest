@@ -30,11 +30,11 @@ def load_google_sheet(sheet_id, sheet_name='NFE_DONUTS'):
     Carrega os dados de uma planilha do Google Sheets.
     """
     scope = ["https://www.googleapis.com/auth/spreadsheets", "https://www.googleapis.com/auth/drive"]
-    creds_info = st.secrets["gcloud"]  # Carregar as credenciais do .devcontainer/secrets.toml
+    creds_path = "C:/Users/Derciel/Desktop/sitema de rastreio donuts/api.json"
 
     try:
-        # Carregar credenciais do dicionário
-        creds = Credentials.from_service_account_info(creds_info, scopes=scope)
+        # Carregar credenciais do arquivo JSON
+        creds = Credentials.from_service_account_file(creds_path, scopes=scope)
         client = gspread.authorize(creds)
 
         # Acessar a planilha e obter dados
@@ -118,7 +118,7 @@ st.markdown("<h3 style='color:white;'>Modo de Consulta:</h3>", unsafe_allow_html
 st.markdown("<p style='color:white;'>1. Localize a nota fiscal pelo CNPJ.</p>", unsafe_allow_html=True)
 st.markdown("<p style='color:white;'>2. Copie a Nota Fiscal.</p>", unsafe_allow_html=True)
 st.markdown("<p style='color:white;'>3. Clique no logo da transportadora RODONAVES ao lado do 'pesquisar nota fiscal'. </p>", unsafe_allow_html=True)
-st.markdown("<p style='color:white;'>4. Após copiar a NF, copie o CNPJ do Remetente - 10.815.855/0001-24 : Nicopel Embalagens e rastreie seu pedido!</p>", unsafe_allow_html=True)
+st.markdown("<p style='color:white;'>4. Apos copiar a NF Copie o CNPJ do Remetente - 10.815.855/0001-24 : Nicopel Embalagens e rastreie seu pedido !</p>", unsafe_allow_html=True)
 
 sheet_id = "1gXMG571pgj2YSKo2LKAqLLZWxd_jyo_xhs4s-bg6bSo"
 
@@ -166,8 +166,8 @@ else:
             """
             <div style='text-align: center; margin-top: 20px;'>
                 <a href='https://rodonaves.com.br/rastreio-de-mercadoria' target='_blank'>
-                    <button style='background-color: blue; color: white; padding: 10px 20px; border: none; border-radius: 5px;'>
-                        <img src='https://i.ibb.co/nnvt26n/logo-header-1.png' alt='Rastrear' style='width: 150px; vertical-align: middle;'>
+                    <button style='background-color: blue; color: black; padding: 10px 20px; border: none; border-radius: 5px;'>
+                        <img src='https://i.ibb.co/nnvt26n/logo-header-1.png' alt='Rastrear' style='width: 150px; vertical-align: middle;'
                     </button>
                 </a>
             </div>
