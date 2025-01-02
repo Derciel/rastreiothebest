@@ -13,7 +13,7 @@ logging.basicConfig(
 )
 
 # Caminho do arquivo CSV offline
-CSV_FILE_PATH = "dados.csv"  # Substitua pelo caminho correto do arquivo CSV
+CSV_FILE_PATH = "notas_the_best.csv"  # Substitua pelo caminho correto do arquivo CSV
 
 # Função para carregar dados do CSV offline
 def carregar_dados_csv_offline(caminho):
