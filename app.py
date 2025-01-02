@@ -99,7 +99,7 @@ else:
         with col1:
             # Campo de busca
             st.markdown("<h3 style='color:white;'>Pesquisar Notas Fiscais</h3>", unsafe_allow_html=True)
-            st.markdown("<p style='color:white;'>Digite o CNPJ para buscar (ex. 00.000.000/0001-00):</p>", unsafe_allow_html=True)
+            st.markdown("<p style='color:white;'>Digite o CNPJ para buscar :</p>", unsafe_allow_html=True)
             query = st.text_input("", value="", key="query_field")  # Campo de texto sem título embutido
 
             if st.button("Buscar Nota Fiscal"):
